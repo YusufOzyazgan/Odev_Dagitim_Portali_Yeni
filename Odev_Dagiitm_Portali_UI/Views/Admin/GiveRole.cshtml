@@ -1,0 +1,131 @@
+﻿
+@{
+    ViewData["Title"] = "GiveRole";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcı Yetkileri</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+   
+    <div class="row ">
+         <div class="col-md-8 ">
+            <div>
+                <h3>Yetki Ver</h3>
+                <hr />
+                <br />
+
+                <div class="mb-2">
+                    <label>Kullanıcı Id</label>
+                    <input type="text" id="txtUserId" class="form-control" readonly="readonly" />
+                </div>
+                <div class="mb-2">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="txtUserName" class="form-control" readonly="readonly" />
+                </div> 
+                <div class="mb-2">
+                    <label>Tam İsim</label>
+                    <input type="text" id="txtFullName" class="form-control" readonly="readonly" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="role" class="form-label">Yetki:</label>
+                    <select id="role" name="role" class="form-select">
+                        <option value="Admin">Admin</option>
+                        <option value="Teacher">Öğretmen</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="giveRole" ">Yetki Ver</button>
+                <div id="divResult"></div>
+            </div>
+        </div>
+    </div>
+  
+    <script>
+        $(document).ready(function () {
+            var ApiBaseUrl = "@ViewBag.ApiBaseUrl";
+            var UserId = "@ViewBag.UserId";
+            var token = localStorage.getItem("token");
+
+
+            if (!token) {
+                window.location.href = '~/Home/Login';
+            }
+
+            $.ajaxSetup({
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            $.ajax({
+                url: ApiBaseUrl +"User/GetById/" + UserId,
+                method: "Get",
+                contentType: "application/json",
+                headers: {
+                    "Authorization": "Bearer " + token
+                },
+                success: function (data) {
+                    console.log(data);
+                    userName = data.userName;
+                    
+                    $("#txtFullName").val(data.full_name);
+                    $("#txtUserName").val(data.userName);
+                    $("#txtUserId").val(UserId);
+                   
+
+                },
+                error: function (e) {
+                    if (e.status === 401) {
+                        localStorage.removeItem("token");
+                        location.href = "/Login";
+                    }
+                }
+            });
+
+            $("#giveRole").click(function () {
+                    const data = {
+
+                        Role: $('#role').val(),
+                        UserName: userName
+                    };
+                    
+
+                    $.ajax({
+                        url: ApiBaseUrl + "User/GiveRole",
+                        data: JSON.stringify(data),
+                        method: "POST",
+                        contentType: "application/json",
+                        success: function (data) {
+                            console.log(data);
+                            $("#divResult")
+                                .show()
+                                .removeClass()
+                                .addClass("alert alert-success")
+                                .html("Yetki Verildi.")
+                                .fadeOut(5000);
+
+
+
+                        },
+                        error: function (e) {
+                            $("#divResult")
+                                .show()
+                                .removeClass()
+                                .addClass("alert alert-danger")
+                                .html("Yetki Verildi.")
+                                .fadeOut(5000);
+                        }
+                    });
+            });
+
+        });
+    </script>
+ 
+ 
+
+    </body>
+</html>

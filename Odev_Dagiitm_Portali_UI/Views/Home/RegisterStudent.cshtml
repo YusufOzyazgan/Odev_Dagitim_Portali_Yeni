@@ -1,0 +1,160 @@
+﻿
+@{
+    ViewData["Title"] = "RegisterStudent";
+}
+
+
+
+<html lang="en">
+
+<head>
+    <title>Student Register</title>
+
+</head>
+
+<body class="bg-gradient-primary">
+
+    <div class="container">
+
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+
+            <div class="col-xl-10 col-lg-12 col-md-9">
+
+                <div class="card o-hidden border-0 shadow-lg my-5">
+                    <div class="card-body p-0">
+
+                        <div class="row">
+                            <div class="col-lg-3"></div>
+                            <div class="col-lg-6">
+                                <div class="p-5">
+                                    <div class="text-center">
+                                        <h1 class="h4 text-gray-900 mb-4">Yeni Öğrenci Kayıt</h1>
+                                    </div>
+                                    <form class="user">
+                                        <div class="form-group m-1">
+                                            <input type="text" class="form-control form-control-user"
+                                                   id="txtFullName" aria-describedby="emailHelp"
+                                                   placeholder="Adı Soyadı">
+                                        </div>
+                                        <div class="form-group m-1">
+                                            <input type="text" class="form-control form-control-user"
+                                                   id="txtUserName" aria-describedby="emailHelp"
+                                                   placeholder="Kullanıcı Adı">
+                                        </div>
+                                        <div class="form-group m-1">
+                                            <input type="email" class="form-control form-control-user"
+                                                   id="txtEmail" aria-describedby="emailHelp"
+                                                   placeholder="E-Posta Adresi">
+                                        </div>
+
+
+                                        <div class="form-group m-1">
+                                            <input type="text" class="form-control form-control-user"
+                                                   id="txtPhoneNumber" aria-describedby="emailHelp"
+                                                   placeholder="Telefon Numarası">
+                                        </div>
+
+                                        <div class="form-group m-1">
+                                            <input type="password" class="form-control form-control-user"
+                                                   id="txtPassword" placeholder="Parola">
+                                        </div>
+                                        
+                                        <a class="btn btn-primary btn-user btn-block" id="btnSignIn">
+                                            Kayıt Ol
+                                        </a>
+
+                                    </form>
+                                    <hr>
+
+                                    <div id="divResult"></div>
+
+                                    <div class="text-center">
+                                        <a class="small" href="~/Home/Login">Oturum Aç</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @section Scripts
+    {
+        <script>
+            $(document).ready(function () {
+                var ApiBaseUrl = "@ViewBag.ApiBaseUrl";
+
+                $("#btnSignIn").click(function () {
+                    var username = $("#txtUserName").val();
+                    var password = $("#txtPassword").val();
+                    var fullname = $("#txtFullName").val();
+                    var phonenumber = $("#txtPhoneNumber").val();
+                    var email = $("#txtEmail").val();
+                 
+
+      
+
+                    if (username == "" || password == "" || fullname == "" || email == "" || phonenumber == "" ) {
+                        $("#divResult")
+                            .show()
+                            .removeClass()
+                            .addClass("alert alert-danger")
+                            .html("Tüm Alanları Doldurunuz!")
+                            .fadeOut(5000);
+                        return false;
+                    }
+
+                    var register = new Object();
+                    register.UserName = username;
+                    register.Password = password;
+                    register.Full_name = fullname;
+                    register.PhoneNumber = phonenumber;
+                    register.Email = email;
+                  
+                    console.log(JSON.stringify(register));
+                    console.log(ApiBaseUrl + "User/RegisterStudent");
+
+                    $.ajax({
+                        url: ApiBaseUrl + "User/RegisterStudent",
+                        method: "POST",
+                        data: JSON.stringify(register),
+                        contentType: "application/json",
+                        success: function (data) {
+                            if (data.status) {
+                                location.href = "/Home/Login";
+                            } else {
+                                $("#divResult")
+                                    .show()
+                                    .removeClass()
+                                    .addClass("alert alert-danger")
+                                    .html(data.message)
+                                    .fadeOut(10000);
+                            }
+                        },
+                        error: function (e) {
+                            console.log(e);
+                            $("#divResult")
+                                .show()
+                                .removeClass()
+                                .addClass("alert alert-danger")
+                                .html("Bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.")
+                                .fadeOut(10000);
+                        }
+                    });
+
+                    return false;
+                });
+            });
+
+        </script>
+    }
+</body>
+
+</html>
+

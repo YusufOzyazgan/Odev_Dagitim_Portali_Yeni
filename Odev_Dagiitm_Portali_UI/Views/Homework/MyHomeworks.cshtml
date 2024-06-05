@@ -1,0 +1,137 @@
+﻿
+@{
+    ViewData["Title"] = "MyHomeworks";
+}
+<style>
+    .btn-no-underline {
+        text-decoration: none; /* Alt çizgiyi kaldırır */
+    }
+</style>
+    <h3>Ödevler</h3>
+
+<div class="col-md-11">
+    <div id="progress"></div>
+
+    <table class="table table-striped " id="tbExams">
+        <thead class="bg-dark">
+            <tr>
+                
+                <th class="text-white">Sınıf İsmi</th>
+                <th class="text-white">Ders İsmi</th>
+                <th class="text-white">Ödev Başlığı</th>
+                <th class="text-white">Son Teslim Tarihi</th>
+                <th class="text-white">Göster/Düzenle</th>
+                <th class="text-white" id="btnDelete">Sil</th>
+
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            var ApiBaseUrl = "@ViewBag.ApiBaseUrl";
+            var token = localStorage.getItem("token"); // Token'ı localStorage'dan alın
+
+            // Tarih biçimini düzenlemek için bir fonksiyon
+            function FormatDate(d) {
+                var date = new Date(d);
+                var day = date.getDate() > 9 ? date.getDate() : '0' + date.getDate();
+                var month = date.getMonth() + 1 > 9 ? date.getMonth() + 1 : '0' + (date.getMonth() + 1); // Ay 0'dan başladığı için +1 ekliyoruz
+                var year = date.getFullYear();
+                return day + "." + month + "." + year; // Biçimlendirilmiş tarihi döndür
+            }
+
+            if (!token) {
+                window.location.href = '~/Home/Login'; // Token yoksa giriş sayfasına yönlendir
+            }
+
+            $.ajaxSetup({
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            $.ajax({
+                url: ApiBaseUrl + "Homeworks/GetHomeworksByTeacher",
+                data: { id: userId },
+                type: "GET",
+                success: function (data) {
+                    var i = 0;
+                    console.log(data);
+                    $.each(data, function (index, item) {
+                        var lessonId = item.lesson_id;
+
+                        $.ajax({
+                            url: ApiBaseUrl + "Lesson/GetById/" + lessonId,
+                            data: { id: lessonId },
+                            type: "GET",
+                            success: function (lessonData) {
+                                var lessonName = lessonData.lesson_name; // Dersin adını al
+                                console.log(lessonName);
+                                var classId = lessonData.class_id;
+
+                                // AJAX isteği yaparak sınıfın adını al
+                                $.ajax({
+                                    url: ApiBaseUrl + "Class/GetById/" + classId,
+                                    data: { id: classId },
+                                    type: "GET",
+                                    success: function (classNameData) {
+                                        var className = classNameData.class_name; // Sınıfın adını al
+
+                                        // Tabloya satır ekle
+                                        $('#tbExams tbody').append(
+                                            '<tr>' +
+                                            '<td>' + className + '</td>' +
+                                            '<td>' + lessonName + '</td>' +
+                                            '<td>' + item.homework_title + '</td>' +
+                                            '<td>' + FormatDate(item.homework_deadline) + '</td>' +
+                                            '<td><button class="btn btn-primary btn-sm"> <a href="/EditHomework/' + item.homework_id + '" class="btn-no-underline btn-btn-primary text-white btn-sm">Göster</a></button></td>' +
+                                            '<td><button class="btn btn-danger delete-btn" data-homework-id=' + item.homework_id + '>Sil</button></td>' +
+                                            '</tr>'
+                                        );
+                                    },
+                                    error: function () {
+                                        alert("Sınıf adı alınamadı!");
+                                    }
+                                });
+                            },
+                            error: function () {
+                                alert("Ders adı alınamadı!");
+                            }
+                        });
+                    });
+
+                },
+                error: function () {
+                    // Hata durumunda
+                    alert("Veri alınamadı!");
+                }
+            });
+
+            // Silme işlemi için tıklama olayı
+            $('#tbExams').on('click', '.delete-btn', function () {
+                var row = $(this).closest('tr');
+                var homeworkId = $(this).data('homework-id');
+
+                if (confirm('Bu ödevi silmek istediğinizden emin misiniz?')) {
+                    $.ajax({
+                        url: ApiBaseUrl + 'Homeworks/Delete/' + homeworkId,
+                        type: 'DELETE',
+                        success: function (response) {
+                            // Silme başarılıysa satırı kaldır
+                            row.remove();
+                            alert('Ödev başarıyla silindi.');
+                        },
+                        error: function (error) {
+                            alert('Ödevi silerken bir hata oluştu.');
+                        }
+                    });
+                }
+            });
+
+        });
+    </script>
+}
+
+

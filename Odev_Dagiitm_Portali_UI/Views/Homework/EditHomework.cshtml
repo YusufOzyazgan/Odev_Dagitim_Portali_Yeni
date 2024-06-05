@@ -1,0 +1,234 @@
+﻿
+@{
+    ViewData["Title"] = "EditHomework";
+}
+
+
+
+<div class="container mt-5">
+    <h1 class="mb-4">Ödev Görüntüleme</h1>
+    <hr />
+    <form id="homeworkForm">
+        <div class="mb-3">
+            <label for="class" class="form-label">Sınıf:</label>
+            <select id="addHomeworkTeacherClasses" name="class" class="form-select">
+                <option value=""></option>
+
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="subject" class="form-label">Ders:</label>
+            <select id="subject" name="subject" class="form-select">
+                <option value=""></option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="title" class="form-label">Ödev Başlığı:</label>
+            <input type="text" id="title" name="title" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label for="content" class="form-label">Ödev İçeriği:</label>
+            <textarea id="content" name="content" class="form-control" rows="4"></textarea>
+        </div>
+
+         <div class="mb-3">
+        <label for="creatingDate" class="form-label">Oluşturulma Tarihi:</label>
+        <input type="date" id="creatingDate" name="creatingDate" class="form-control">
+        </div>
+
+        <div class="mb-3">
+        <label for="UpdateDate" class="form-label">Güncellenme Tarihi:</label>
+        <input type="date" id="updateDate" name="updateDate" class="form-control">
+        </div> 
+
+        <div class="mb-3">
+            <label for="dueDate" class="form-label">Son Teslim Tarihi:</label>
+            <input type="date" id="dueDate" name="dueDate" class="form-control">
+        </div>
+
+        <button type="submit" id="btnUpdate" class="btn btn-primary">Ödevi Güncelle</button>
+        <div id="divResult"> </div>
+    </form>
+</div>
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            var ApiBaseUrl = "@ViewBag.ApiBaseUrl";
+            var HomeworkId = "@ViewBag.HomeworkId";
+            var token = localStorage.getItem("token"); // Token'ı localStorage'dan alın
+
+            if (!token) {
+                window.location.href = '~/Home/Login';
+            }
+
+            $.ajaxSetup({
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            
+            $.ajax({
+                    url: ApiBaseUrl + 'Homeworks/GetById/'+HomeworkId,
+                    type: 'GET',
+                    success: function (response) {
+                    $.ajax({
+                        url: ApiBaseUrl + 'Lesson/GetById/'+response.lesson_id ,
+                        type: 'GET',
+                        success: function (data) {
+                            var lessonId = data.lesson_id;
+                            var lessonName = data.lesson_name;
+                            var ClassId = data.class_id;
+                            console.log("get lesson "+lessonId,lessonName,ClassId)
+                            $.ajax({
+                                url: ApiBaseUrl + 'Class/GetById/' + ClassId,
+                                type: 'GET',
+                                success: function (data2) {
+                                    var class_name = data2.class_name;
+                                    console.log("data 2 "+class_name)
+                                    var selectClass = $("#addHomeworkTeacherClasses");
+                                    var selectLesson = $("#subject");
+                                    selectClass.empty(); 
+                                    selectLesson.empty();
+                                    selectClass.append('<option value="' + ClassId + '">' + class_name + '</option>');
+                                    selectLesson.append('<option value="'+lessonId+ '">' +lessonName +'</option>')
+                                    
+                                    $("#title").val(response.homework_title);
+                                    $("#content").val(response.homework_content);
+                                    $("#creatingDate").val(FormatDate(response.created));
+                                    $("#updateDate").val(FormatDate(response.updated));
+                                    $("#dueDate").val(FormatDate(response.homework_deadline));
+
+                                    const data = {
+                                        Homework_id: HomeworkId,
+                                        Lesson_id: $('#subject').val(),
+                                        Homework_title: $('#title').val(),
+                                        Homework_content: $('#content').val(),
+                                        created: convertToDate($('#creatingDate').val()),
+                                        updated: convertToDate($('#updateDate').val()),
+                                        Homework_deadline: convertToDate($('#dueDate').val()),
+                                        User_id: userId
+                                    };
+                                    console.log(data);
+
+
+                                },
+                                error: function (error) {
+                                    $('#divresult').append("Dersler yüklenirken bir hata oluştu.");
+
+                                }
+                            });
+
+                        },
+                        error: function (error) {
+                            $('#divresult').append("Dersler yüklenirken bir hata oluştu.");
+
+                        }
+                    });
+                      
+                    },
+                    error: function (error) {
+                    $("#divResult")
+                        .show()
+                        .removeClass()
+                        .addClass("alert alert-danger")
+                        .html("dersler yüklenirken hata oluştu.")
+                        .fadeOut(5000);
+
+
+                    }
+             });
+            $('#addHomeworkTeacherClasses').change(function () {
+                var selectedClass = $(this).val();
+                $.ajax({
+                    url: ApiBaseUrl + 'Lesson/GetLessonByClassId',
+                    type: 'GET',
+                    data: { id: selectedClass },
+                    success: function (response) {
+                        var subjectSelect = $('#subject');
+                        subjectSelect.empty();
+                        console.log(response);
+                        response.forEach(function (subject) {
+                            subjectSelect.append('<option value="' + subject.lesson_id + '">' + subject.lesson_name + '<option>');
+                          
+
+                        });
+                    },
+                    error: function (error) {
+                        $("#divResult")
+                            .show()
+                            .removeClass()
+                            .addClass("alert alert-danger")
+                            .html("dersler yüklenirken hata oluştu.")
+                            .fadeOut(5000);
+
+                    }
+                });
+            });
+            
+
+
+            $("#btnUpdate").click(function () {
+                
+                const data = {
+                    Homework_id: HomeworkId,
+                    Lesson_id: $('#subject').val(),
+                    Homework_title: $('#title').val(),
+                    Homework_content: $('#content').val(),
+                    created: convertToDate($('#creatingDate').val()),
+                    updated: convertToDate($('#updateDate').val()),
+                    Homework_deadline: convertToDate($('#dueDate').val()),
+                    User_id: userId
+                };
+                console.log(data);
+                $.ajax({
+                    url: ApiBaseUrl + 'Homeworks/Edit',
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (response) {
+                        $("#divResult")
+                            .show()
+                            .removeClass()
+                            .addClass("alert alert-success")
+                            .html(response.message)
+                            .fadeOut(5000);
+                        //location.href = "/Homework/MyHomeworks";
+                    },
+                    error: function (error) {
+                        $("#divResult")
+                            .show()
+                            .removeClass()
+                            .addClass("alert alert-danger")
+                            .html(response.message)
+                            .fadeOut(5000);
+                    }
+                });
+            });
+            function convertToDate(dateString) {
+                
+                var parts = dateString.split("-");
+                var year = parseInt(parts[0], 10);
+                var month = parseInt(parts[1], 10) - 1; // Aylar 0-11 arası olduğundan 1 eksiltiyoruz
+                var day = parseInt(parts[2], 10);
+
+                return new Date(year, month, day);
+            }
+            function FormatDate(d) {
+                var date = new Date(d);
+                var day = date.getDate() > 9 ? date.getDate() : '0' + date.getDate();
+                var mount = date.getMonth() > 9 ? date.getMonth() : '0' + date.getMonth();
+                var year = date.getFullYear();
+
+                var hour = date.getHours() > 9 ? date.getHours() : '0' + date.getHours();
+                var minute = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes();
+                var second = date.getSeconds() > 9 ? date.getSeconds() : '0' + date.getSeconds();
+
+                var fd = year + "-" + mount + "-" + day;
+                return fd
+            }
+        });
+    </script>
+}

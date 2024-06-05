@@ -1,0 +1,128 @@
+﻿
+@{
+    ViewData["Title"] = "MyHomeworkSubmission";
+}
+<h3>Ödev Teslimlerim</h3>
+<hr />
+<br />
+<div class="col-md-12">
+    <div id="progress"></div>
+
+    <table class="table table-striped" id="tbSubmissions">
+        <thead class="bg-dark">
+            <tr>
+
+                <th class="text-white">Ders İsmi</th>
+                <th class="text-white">Ödev Başlığı</th>
+                <th class="text-white">Ödev Eklenme Tarihi</th>
+                <th class="text-white">Göster/Düzenle</th>
+                <th class="text-white" id="btnDelete">Sil</th>
+
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            var ApiBaseUrl = "@ViewBag.ApiBaseUrl";
+            var token = localStorage.getItem("token");
+
+       
+            
+
+            if (!token) {
+                window.location.href = '~/Home/Login';
+            }
+
+            $.ajaxSetup({
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            $.ajax({
+                url: ApiBaseUrl + "HomeworkSubmission/GetHomeworksByStudent",
+                data: { id: userId },
+                type: "GET",
+                success: function (data) {
+                    var i = 0;
+                    console.log(data);
+                    $.each(data, function (index, item) {
+                        var homeworkId = item.homework_id;
+                        var created = item.created;
+                       
+                        $.ajax({
+                            url: ApiBaseUrl + "Homeworks/GetById/" + homeworkId,
+                            data: { id: homeworkId },
+                            type: "GET",
+                            success: function (homeworkData) {
+                                var lessonId = homeworkData.lesson_id;
+                                $.ajax({
+                                url: ApiBaseUrl + "Lesson/GetById/" + lessonId,
+                                data: { id: lessonId },
+                                type: "GET",
+                                    success: function (lessonData) {
+
+                                        $('#tbSubmissions tbody').append(
+                                            '<tr>' +
+
+                                            '<td>' + lessonData.lesson_name + '</td>' +
+                                            '<td>' + homeworkData.homework_title + '</td>' +
+                                            '<td>' + FormatDate(created) + '</td>' +
+                                            '<td><button class="btn btn-primary btn-sm"> <a href="/EditHomeworkSubmission/' + item.submission_id + '" class="btn-no-underline text-decoration-none btn-btn-primary text-white btn-sm">Göster</a></button></td>' +
+                                            '<td><button class="btn btn-danger delete-btn" data-submission-id=' + item.submission_id + '>Sil</button></td>' +
+                                            '</tr>'
+                                        );
+                                    },
+                                    error: function () {
+                                        alert("Ders adı alınamadı!");
+                                    }
+                                });
+                            },
+                            error: function () {
+                                alert("Ödev adı alınamadı!");
+                            }
+                        });
+                    });
+
+                },
+                error: function () {
+                    // Hata durumunda
+                    alert("Veri alınamadı!");
+                }
+            });
+
+            // Silme işlemi için tıklama olayı
+            $('#tbSubmissions').on('click', '.delete-btn', function () {
+                var row = $(this).closest('tr');
+                var submissionId = $(this).data('submission-id');
+
+                if (confirm('Bu ödev teslimini silmek istediğinizden emin misiniz?')) {
+                    $.ajax({
+                        url: ApiBaseUrl + 'HomeworkSubmission/Delete/' + submissionId,
+                        type: 'DELETE',
+                        success: function (response) {
+                            // Silme başarılıysa satırı kaldır
+                            row.remove();
+                            alert('Ödev başarıyla silindi.');
+                        },
+                        error: function (error) {
+                            alert('Ödevi silerken bir hata oluştu.');
+                        }
+                    });
+                }
+            });
+            function FormatDate(d) {
+                var date = new Date(d);
+                var day = date.getDate() > 9 ? date.getDate() : '0' + date.getDate();
+                var month = date.getMonth() + 1 > 9 ? date.getMonth() + 1 : '0' + (date.getMonth() + 1); // Ay 0'dan başladığı için +1 ekliyoruz
+                var year = date.getFullYear();
+                return day + "." + month + "." + year; // Biçimlendirilmiş tarihi döndür
+            }
+        });
+    </script>
+}
+
+

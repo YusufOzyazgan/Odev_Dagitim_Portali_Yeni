@@ -1,0 +1,94 @@
+﻿
+@{
+    ViewData["Title"] = "Users";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+
+    <h3>Kullanıcı Listesi</h3>
+    <hr />
+    <br />
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Kullanıcı Adı</th>
+                <th>Tam Adı</th>
+                <th>E-posta</th>
+                <th>Telefon Numarası</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody id="userTableBody">
+            <!-- AJAX ile doldurulacak -->
+        </tbody>
+    </table>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            var ApiBaseUrl = "@ViewBag.ApiBaseUrl";
+            var token = localStorage.getItem("token");
+
+            if (!token) {
+                window.location.href = '~/Home/Login';
+            }
+
+            $.ajaxSetup({
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            
+            
+            $.ajax({
+                url: ApiBaseUrl + 'User/List',
+                method: 'GET',
+                success: function (data) {
+                    var userTableBody = $('#userTableBody');
+                    userTableBody.empty();
+
+                    data.forEach(function (user) {
+                        var row = '<tr>' +
+                            '<td><b>' + user.userName + '</b></td>' +
+                            '<td>' + user.full_name + '</td>' +
+                            '<td>' + user.email + '</td>' +
+                            '<td>' + user.phoneNumber + '</td>' +
+                            '<td>' +
+                            '<button class="btn btn-danger btn-sm delete-btn" data-id="' + user.id + '">Sil</button> ' +
+                            '<button class="btn btn-warning btn-sm authorize-btn" data-id="' + user.id + '">Yetki Ver</button>' +
+                            '</td>' +
+                            '</tr>';
+                        userTableBody.append(row);
+                    });
+
+                    // Kullanıcıyı silme işlemi
+                    $('.delete-btn').click(function () {
+                        var userId = $(this).data('id');
+                        $.ajax({
+                            url: ApiBaseUrl + 'User/Delete/' + userId,
+                            method: 'DELETE',
+                            success: function () {
+                                alert('Kullanıcı başarıyla silindi.');
+                                location.reload(); // Sayfayı yenileyerek tabloyu güncelle
+                            },
+                            error: function (xhr, status, error) {
+                                console.error('Kullanıcı silinirken bir hata oluştu:', error);
+                            }
+                        });
+                    });
+
+                    // Kullanıcıya yetki verme işlemi
+                    $('.authorize-btn').click(function () {
+                        var userId = $(this).data('id');
+                        window.location.href = "/GiveRole/" + userId;
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Kullanıcı listesi alınırken bir hata oluştu:', error);
+                }
+            });
+        });
+    </script>
+
+
+}

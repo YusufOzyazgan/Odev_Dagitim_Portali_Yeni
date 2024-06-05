@@ -1,0 +1,174 @@
+﻿
+@{
+    ViewData["Title"] = "addUserClass";
+}
+
+<h1 class="text-center mt-4">Sınıf Ekleme</h1>
+<hr />
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h3 class="card-title text-center">Kayıtlı Sınıflarım</h3>
+                    <hr />
+                    <ul class="list-group list-group-flush" id="registeredClassesList">
+                        
+                            <li class="list-group-item">
+                                <h5 class="mb-1" id="Classes"></h5>
+                            </li>
+                        
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title text-center">Yeni Sınıf Ekle</h3>
+                    <form method="post" action="/Class/Create">
+                        <div class="form-group">
+                            <label for="classType">Sınıf Tipi</label>
+                            <select id="classType" name="classType" class="form-control">
+                                <option value="">Bir sınıf seçin</option>
+                                <option value="2">Bilgisayar Programcılğı</option>  
+                                <option value="6">Edebiyat</option>
+                                <option value="7">Elektrik Elektronik Mühendisliği</option>
+                                <option value="8">Makine Mühendisliği</option>
+                                <option value="9">İngiliz Dili Ve Edebiyatı</option>
+                                
+                            </select>
+                        </div>
+
+                        <div class="form-group text-center">
+                            <button type="submit" id="btnAddUserClass" class="btn btn-primary mt-3">Kaydet</button>
+                        </div>
+                        <div id="divResult"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    
+
+    <script>
+        $(document).ready(function () {
+
+            var token = localStorage.getItem("token");
+            if (token == "" || token == null) {
+                location.href = "/Home/Login";
+                return false;
+            }
+
+
+
+
+
+
+
+
+
+
+            
+
+            var ApiBaseUrl = "@ViewBag.ApiBaseUrl";
+
+            $("#btnAddUserClass").click(function () {
+                
+                var selectedclass = parseInt($("#classType").val(), 10);
+                console.log("Class İD = " + selectedclass);
+
+
+                if ( selectedclass == "") {
+                    $("#divResult")
+                        .show()
+                        .removeClass()
+                        .addClass("alert alert-danger")
+                        .html("Bir Sınıf Seçiniz!")
+                        .fadeOut(5000);
+                    return false;
+                }
+
+                var UserClass = new Object();
+                
+                UserClass.ClassId = selectedclass;
+                UserClass.UserId = userId;
+
+                
+                
+
+                $.ajax({
+                    url: ApiBaseUrl + "Class/AddUserClass",
+                    method: "POST",
+                    data: JSON.stringify(UserClass),
+                    contentType: "application/json",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+
+                    success: function (data) {
+                        if (data.status) {
+                            $("#divResult")
+                                .show()
+                                .removeClass()
+                                .addClass("alert alert-success")
+                                .html(data.message)
+                                .fadeOut(3000);
+                            showUserClass();
+                            $("#classType").val('');
+                        } else {
+                            $("#divResult")
+                                .show()
+                                .removeClass()
+                                .addClass("alert alert-danger")
+                                .html(data.message)
+                                .fadeOut(4000);
+                        }
+                    },
+                    error: function (e) {
+                        console.log(e);
+                        $("#divResult")
+                            .show()
+                            .removeClass()
+                            .addClass("alert alert-danger")
+                            .html("Sınıf Seçmelisiniz.")
+                            .fadeOut(4000);
+                    }
+                });
+
+                return false;
+            });
+            $(document).on('click', '.btnDelete', function () {
+                var $listItem = $(this).closest('li');
+                var classId = $listItem.data('id');
+                console.log(ApiBaseUrl + 'Class/DeleteUserClass/' + classId)
+
+                $.ajax({
+                    url: ApiBaseUrl + 'Class/DeleteUserClass/' + classId,
+                    type: 'DELETE',
+                    success: function (result) {
+                        $("#divResult").show();
+                        if (result.status) { 
+                            $("#divResult").removeClass().addClass("alert alert-success"); 
+                            showUserClass();
+                        } else {
+                            $("#divResult").removeClass().addClass("alert alert-danger");
+                        }
+                        $("#divResult").html(result.message); 
+                        $("#divResult").fadeOut(4000);
+                    },
+                    error: function (e) {
+                        if (e.status === 401) { // '==' yerine '===' kullanmak daha iyi olur
+                            localStorage.removeItem("token");
+                            location.href = "/Login";
+                        }
+                    }
+                });
+
+            });
+        });
+    </script>
+}
+
+

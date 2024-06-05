@@ -1,0 +1,117 @@
+﻿
+@{
+    ViewData["Title"] = "Register";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light grey background for a modern look */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            background: #ffffff; /* White background for the container */
+            padding: 40px;
+            border-radius: 15px; /* Rounded corners */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+            margin-top: 50px;
+        }
+
+        .btn {
+            padding: 15px 25px; /* Larger buttons */
+            font-size: 1.25rem; /* Larger font size */
+            transition: transform 0.2s, background-color 0.2s; /* Smooth hover effect */
+        }
+
+        .btn-primary {
+            background-color: #007bff; /* Bootstrap primary color */
+            border-color: #007bff;
+        }
+
+            .btn-primary:hover {
+                background-color: #0056b3;
+                border-color: #004085;
+                transform: scale(1.05); /* Slightly increase size on hover */
+            }
+
+        .btn-success {
+            background-color: #28a745; /* Bootstrap success color */
+            border-color: #28a745;
+        }
+
+            .btn-success:hover {
+                background-color: #218838;
+                border-color: #1e7e34;
+                transform: scale(1.05); /* Slightly increase size on hover */
+            }
+
+        .card-header.bg-gradient-primary {
+            background: linear-gradient(90deg, rgba(0,123,255,1) 0%, rgba(2,117,216,1) 100%);
+        }
+
+        .card {
+            border: none;
+        }
+
+        h1, h2 {
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="bg-gradient-primary">
+
+    <div class="container">
+
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+
+            <div class="col-xl-10 col-lg-12 col-md-9">
+
+                <div class="card o-hidden border-0 shadow-lg my-5">
+                    <div class="card-body p-0">
+
+                        <div class="row">
+                            <div class="col-lg-3"></div>
+                            <div class="col-lg-6">
+                                <div class="p-5">
+
+    
+                                    <div class="text-center">
+                                       
+                                            
+                                            <h2 class="my-2">Kayıt Ol</h2>
+                                            <hr />
+                                            <div class="card-body text-center">
+                                                <p class="lead mb-5"><b><br />Lütfen kayıt türünü seçin:</b></p>
+                                                <div class="d-grid gap-2 d-md-flex justify-content-md-center m-4">
+                                                    <a class="btn btn-primary btn-lg me-md-2" href="~/Home/RegisterStudent">Öğrenci Kayıt</a>
+                                                    <a class="btn btn-success btn-lg" href="~/Home/RegisterTeacher">Öğretmen Kayıt</a>
+                                                </div>
+                                            </div>
+                                       
+                                    </div>
+                            
+                                </div>
+                           </div>
+
+                        </div>
+                        
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+
+
+</body>
+</html>

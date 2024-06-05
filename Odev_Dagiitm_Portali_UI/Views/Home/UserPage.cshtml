@@ -1,0 +1,144 @@
+﻿
+@{
+    ViewData["Title"] = "UserPage";
+}
+<h1>Kullanıcı Bilgileri</h1>
+<hr />
+<br />
+<div class="row ">
+    <div class="col-md-8 ">
+        <div class="mb-2">
+            <label>Adı Soyadı</label>
+            <input type="text" id="txtFullName" class="form-control" />
+        </div>
+        <div class="mb-2">
+            <label>Kullanıcı Adı</label>
+            <input type="text" id="txtUserName" class="form-control" readonly="readonly" />
+        </div>
+        <div class="mb-2">
+            <label>E-Posta</label>
+            <input type="text" id="txtEmail" class="form-control" />
+        </div>
+        <div class="mb-2">
+            <label>Telefon</label>
+            <input type="text" id="txtPhone" class="form-control" />
+        </div>
+        <div id="divResult"></div>
+        <button class="btn btn-primary" id="btnSave">Kaydet</button>
+    </div>
+    <div class="card shadow-sm col-md-4 mb-4">
+        <div class="card-body">
+            <h3 class="card-title text-center">Kayıtlı Sınıflarım</h3>
+            <hr />
+            <ul class="list-group list-group-flush" id="registeredClassesList2">
+                <li class="list-group-item">
+                    <h5 class="mb-1" id="Classes2"></h5>
+                </li>
+            </ul>
+        </div>
+        <div class="card-footer" style="text-align: center;">
+            <a class="btn btn-primary " href="~/Home/addUserClass">Sınıf Ekle-Çıkar</a>
+        </div>
+    </div>
+
+
+</div>
+
+
+@section Scripts {
+   
+
+    <script>
+        $(document).ready(function () {
+            var token = localStorage.getItem("token");
+            if (!token) {
+                window.location.href = "/Home/Login";
+                return;
+            }
+
+            var ApiBaseUrl = "@ViewBag.ApiBaseUrl";
+            GetUserInfo();
+
+            console.log(ApiBaseUrl + "User/GetById/" + userId);
+
+            function GetUserInfo() {
+                $.ajax({
+                    url: ApiBaseUrl + "User/GetById/" + userId,
+                    method: "Get",
+                    contentType: "application/json",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    success: function (data) {
+                        console.log(data);
+                       
+                        $("#txtFullName").val(data.full_name);
+                        $("#txtUserName").val(data.userName);
+                        $("#txtEmail").val(data.email);
+                        $("#txtPhone").val(data.phoneNumber);
+
+                    },
+                    error: function (e) {
+                        if (e.status === 401) {
+                            localStorage.removeItem("token");
+                            location.href = "/Login";
+                        }
+                    }
+                });
+
+            }
+
+            
+
+            $("#btnSave").click(function () {
+                var fullName = $("#txtFullName").val();
+                var userName = $("#txtUserName").val();
+                var email = $("#txtEmail").val();
+                var phoneNumber = $("#txtPhone").val();
+
+                var register = new Object();
+                register.Full_name = fullName;
+                register.UserName = userName;
+                register.Email = email;
+                register.PhoneNumber = phoneNumber;
+                register.Id = userId;
+                console.log(register);
+
+                $.ajax({
+                    url: ApiBaseUrl + "User/Update",
+                    type: "Put",
+                    contentType: "application/json",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    data: JSON.stringify(register),
+                    success: function (data) {
+                        console.log(data);
+                        if (data.status) {
+                            $("#divResult")
+                                .show()
+                                .removeClass()
+                                .addClass("alert alert-success")
+                                .html(data.message)
+                                .fadeOut(5000);
+                               
+
+                        } else {
+                            $("#divResult")
+                                .show()
+                                .removeClass()
+                                .addClass("alert alert-danger")
+                                .html(data.message)
+                                .fadeOut(5000);
+                        }
+
+                    },
+                    error: function () { }
+                });
+
+            });
+
+        });
+
+    </script>
+}

@@ -1,0 +1,91 @@
+﻿
+@{
+    ViewData["Title"] = "AddHomeworkSubmission";
+}
+
+
+
+
+<div class="container mt-5">
+    <h1 class="mb-4">Ödev Teslimi Ekleme Sayfası</h1>
+    <form id="homeworkSubmissionForm">
+        
+       
+
+        <div class="mb-3">
+            <label for="fileUpload" class="form-label">Dosya Yükle:</label>
+            <input type="file" id="fileUpload" name="fileUpload" class="form-control">
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary">Gönder</button>
+        <br />
+        <br />
+
+        <div id="divResult"></div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            console.log(userId)
+            var ApiBaseUrl = "@ViewBag.ApiBaseUrl";
+            var HomeworkId = "@ViewBag.HomeworkId";
+            var token = localStorage.getItem("token");
+
+            if (!token) {
+                window.location.href = ApiBaseUrl + 'Account/Login';
+            }
+
+            $.ajaxSetup({
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            $('#submitBtn').click(function (event) {
+                event.preventDefault();
+
+                var formData = new FormData();
+                var file = $('#fileUpload')[0].files[0];
+                var fileName = $('#file_name').val();
+                var userId = userId;
+               
+                formData.append('file', file);
+                formData.append('File_name', fileName);
+                formData.append('Homework_id', HomeworkId);
+                //formData.append('User_id', userId);
+
+                $.ajax({
+                    url: ApiBaseUrl + 'HomeworkSubmission/UploadFile',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                       
+                        
+                        $("#divResult")
+                            .show()
+                            .removeClass()
+                            .addClass("alert alert-success")
+                            .html(response.message)
+                            .fadeOut(5000);
+
+                        location.href = "/Homework/StudentHomework";
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        $("#divResult")
+                            .show()
+                            .removeClass()
+                            .addClass("alert alert-danger")
+                            .html("Ödev Eklenemedi.")
+                            .fadeOut(5000);
+                       
+                        if (jqXHR.responseJSON && jqXHR.responseJSON.message) {
+                            console.log('Hata mesajı:', jqXHR.responseJSON.message);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

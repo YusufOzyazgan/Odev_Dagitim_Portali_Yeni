@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ödev Ekleme</title>
+    
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Ödev Ekleme Sayfası</h1>
+        <form id="homeworkForm">
+            <div class="mb-3">
+                <label for="class" class="form-label">Sınıf:</label>
+                <select id="addHomeworkTeacherClasses" name="class" class="form-select">
+                    <option value=""></option>
+                   
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="subject" class="form-label">Ders:</label>
+                <select id="subject" name="subject" class="form-select">
+                    <option value=""></option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Ödev Başlığı:</label>
+                <input type="text" id="title" name="title" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label for="content" class="form-label">Ödev İçeriği:</label>
+                <textarea id="content" name="content" class="form-control" rows="4"></textarea>
+            </div>
+
+            @* <div class="mb-3">
+                <label for="startDate" class="form-label">Eklenme Tarihi:</label>
+                <input type="date" id="startDate" name="startDate" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label for="endDate" class="form-label">Çıkartılma Tarihi:</label>
+                <input type="date" id="endDate" name="endDate" class="form-control">
+            </div> *@
+
+            <div class="mb-3">
+                <label for="dueDate" class="form-label">Son Teslim Tarihi:</label>
+                <input type="date" id="dueDate" name="dueDate" class="form-control">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Ödev Ekle</button>
+            <div id="divResult"> </div>
+        </form>
+    </div>
+@section Scripts 
+{
+    <script>
+        $(document).ready(function () {
+                var ApiBaseUrl = "@ViewBag.ApiBaseUrl";
+                var token = localStorage.getItem("token"); // Token'ı localStorage'dan alın
+
+                if (!token) {
+                    window.location.href = "~/Home/Login";
+                }
+
+                $.ajaxSetup({
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                $('#addHomeworkTeacherClasses').change(function () {
+                    var selectedClass = $(this).val();
+                   
+
+                    $.ajax({
+                        url: ApiBaseUrl + 'Lesson/GetLessonByClassId',
+                        type: 'GET',
+                        data: { id: selectedClass },  
+                        success: function (response) {
+                            var subjectSelect = $('#subject');
+                            subjectSelect.empty();
+                            console.log(response);
+                            response.forEach(function (subject) {
+                                subjectSelect.append('<option value="' + subject.lesson_id + '">' + subject.lesson_name + '</option>');
+                                console.log({ subject: $('#subject').val(), title: $('#title').val(), content: $('#content').val(), dueDate: $('#dueDate').val() });
+                            
+                            });
+                        },
+                        error: function (error) {
+                            $('#divresult').append("Dersler yüklenirken bir hata oluştu.");
+                           
+                        }
+                    });
+                });
+
+
+            
+            $('#homeworkForm').on('submit', function (e) {
+                e.preventDefault();
+                console.log(userId)
+                const data = {
+                    
+                    Lesson_id: $('#subject').val(),
+                    Homework_title: $('#title').val(),
+                    Homework_content: $('#content').val(),
+                    // startDate: $('#startDate').val(),
+                    // endDate: $('#endDate').val(),
+                    Homework_deadline: $('#dueDate').val(),
+                    User_id : userId
+                };
+
+                $.ajax({
+                    url: ApiBaseUrl+'Homeworks/Add',  
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (response) {
+                            $("#divResult")
+                                .show()
+                                .removeClass()
+                                .addClass("alert alert-success")
+                                .html(response.message)
+                                .fadeOut(5000);
+                            location.href = "/Homework/MyHomeworks";
+                    },
+                    error: function (error) {
+                            $("#divResult")
+                                .show()
+                                .removeClass()
+                                .addClass("alert alert-danger")
+                                .html(response.message)
+                                .fadeOut(5000);
+                    }
+                });
+            });
+        });
+    </script>
+}
+</body>
+</html>

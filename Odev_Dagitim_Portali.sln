@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34616.47
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Odev_Dagitim_Portali", "Odev_Dagitim_Portali\Odev_Dagitim_Portali.csproj", "{015A080B-B291-424F-A0FB-9CAA32E92D8C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Odev_Dagiitm_Portali_UI", "Odev_Dagiitm_Portali_UI\Odev_Dagiitm_Portali_UI.csproj", "{1580001D-4E5B-4600-8C93-B37E8FD55E6A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{015A080B-B291-424F-A0FB-9CAA32E92D8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{015A080B-B291-424F-A0FB-9CAA32E92D8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{015A080B-B291-424F-A0FB-9CAA32E92D8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{015A080B-B291-424F-A0FB-9CAA32E92D8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1580001D-4E5B-4600-8C93-B37E8FD55E6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1580001D-4E5B-4600-8C93-B37E8FD55E6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1580001D-4E5B-4600-8C93-B37E8FD55E6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1580001D-4E5B-4600-8C93-B37E8FD55E6A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FC92335D-F0E6-470A-8545-E9C4DAA3E8FB}
+	EndGlobalSection
+EndGlobal

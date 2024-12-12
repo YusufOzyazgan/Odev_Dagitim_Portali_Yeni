@@ -1,1 +1,1 @@
-Web site's video = https://youtu.be/us-kAm9vk5M
+Website video = https://youtu.be/us-kAm9vk5M
